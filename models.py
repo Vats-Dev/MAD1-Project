@@ -2,6 +2,7 @@ from app import app
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_login import UserMixin
+from flask import current_app
 
 db=SQLAlchemy(app)
 
@@ -39,7 +40,7 @@ class BookRequest(db.Model):
     return_date = db.Column(db.DateTime)
     is_active = db.Column(db.Boolean, default=True)  # Indicates whether the request is active or not
 
-with app.context():
+with current_app.app_context():
     db.create_all()
 
 

@@ -1,11 +1,15 @@
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, session
 from app import app
 from models import db, User, Section, Book, BookRequest
 from werkzeug.security import generate_password_hash, check_password_hash
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    if 'user_id' in session:
+        return render_template('index.html')
+    else:
+        flash('Please login to continue')
+        return redirect(url_for('login'))
 
 @app.route('/login')
 def login():
@@ -29,6 +33,9 @@ def login_post():
     if not check_password_hash(user.passhash, password):
         flash('Incorect password!')
         return redirect(url_for('login'))
+
+    session['user_id'] = user.id
+    flash('Login successful')
     
     return redirect(url_for('index'))
 

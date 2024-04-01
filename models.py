@@ -1,24 +1,20 @@
 from app import app
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
-from flask_login import UserMixin
-from flask import current_app
 
 db=SQLAlchemy(app)
 
-# Define models for User, Section, Book, and BookRequest
-class User(UserMixin, db.Model):
+class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     username = db.Column(db.String(50), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
+    passhash = db.Column(db.String(100), nullable=False)
     is_librarian = db.Column(db.Boolean, default=False)
 
 
 class Section(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    date_created = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text)
 
 
@@ -27,8 +23,9 @@ class Book(db.Model):
     name = db.Column(db.String(100), nullable=False)
     content = db.Column(db.Text, nullable=False)
     author = db.Column(db.String(100), nullable=False)
-    pages = db.Column(db.Integer)  # Add pages/volume information
+    pages = db.Column(db.Integer)  
     section_id = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=False)
+    
     section = db.relationship('Section', backref=db.backref('books', lazy=True))
 
 
@@ -36,11 +33,11 @@ class BookRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     book_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
-    request_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    request_date = db.Column(db.DateTime, nullable=False)
     return_date = db.Column(db.DateTime)
-    is_active = db.Column(db.Boolean, default=True)  # Indicates whether the request is active or not
+    is_active = db.Column(db.Boolean, default=True)  
 
-with current_app.app_context():
+with app.app_context():
     db.create_all()
 
 

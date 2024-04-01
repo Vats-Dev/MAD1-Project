@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash
 from app import app
-from models import User, Section, Book, BookRequest
+from models import db, User, Section, Book, BookRequest
 from werkzeug.security import generate_password_hash, check_password_hash
 
 @app.route('/')

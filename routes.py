@@ -3,6 +3,7 @@ from app import app
 from models import db, User, Section, Book, BookRequest
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+from datetime import datetime
 
 @app.route('/login')
 def login():
@@ -141,12 +142,32 @@ def logout():
 @app.route('/admin')
 @admin_required
 def admin():
-    return render_template('admin.html')
+    sections = Section.query.all()
+    return render_template('admin.html', sections=sections)
 
 @app.route('/section/add')
 @admin_required
 def add_section():
-    return "add section"
+    return render_template('section/add.html')
+
+@app.route('/section/add', methods=['POST'])
+@admin_required
+def add_section_post():
+    name = request.form.get('name')
+    description = request.form.get('description')
+    #date_created = request.form.get('date_created')
+    date_created = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+    if not name:
+        flash('Please fill out all fields')
+        return redirect(url_for('add_section'))
+
+    section = Section(name=name, description=description)
+
+    db.session.add(section)
+    db.session.commit()
+    flash('Section added successfully')
+    return redirect(url_for('admin'))
+
 
 @app.route('/section/<int:id>/')
 @admin_required
@@ -156,9 +177,66 @@ def show_section(id):
 @app.route('/section/<int:id>/edit')
 @admin_required
 def edit_section(id):
-    return "edit section"
+    section = Section.query.get(id)
+    if not section:
+        flash('Section does not exist')
+        return redirect(url_for('admin'))
+    return render_template('section/edit.html', section=section)
+
+'''@app.route('/section/<int:id>/edit', methods=['POST'])
+@admin_required
+def edit_section_post(id):
+    section = Section.query.get(id)
+    if not section:
+        flash('Section does not exist')
+        return redirect(url_for('admin'))
+    name = request.form.get('name')
+    if not name:
+        flash('Please fill out all fields')
+        return redirect(url_for('edit_section', id=id))
+    section.name = name
+    db.session.commit()
+    flash('Section updated successfully')
+    return redirect(url_for('admin'))'''
+
+@app.route('/section/<int:id>/edit', methods=['POST'])
+@admin_required
+def edit_section_post(id):
+    section = Section.query.get(id)
+    if not section:
+        flash('Section does not exist')
+        return redirect(url_for('admin'))
+    name = request.form.get('name')
+    description = request.form.get('description')  
+    if not name or not description:  
+        flash('Please fill out all fields')
+        return redirect(url_for('edit_section', id=id))
+    section.name = name
+    section.description = description  
+    section.date_created = datetime.utcnow()  
+    db.session.commit()
+    flash('Section updated successfully')
+    return redirect(url_for('admin'))
+
 
 @app.route('/section/<int:id>/delete')
 @admin_required
 def delete_section(id):
-    return "delete section"
+    section = Section.query.get(id)
+    if not section:
+        flash('Section does not exist')
+        return redirect(url_for('admin'))
+    return render_template('section/delete.html', section=section)
+
+@app.route('/section/<int:id>/delete', methods=['POST'])
+@admin_required
+def delete_section_post(id):
+    section = Section.query.get(id)
+    if not section:
+        flash('Section does not exist')
+        return redirect(url_for('admin'))
+    db.session.delete(section)
+    db.session.commit()
+
+    flash('Section deleted successfully')
+    return redirect(url_for('admin'))

@@ -172,7 +172,11 @@ def add_section_post():
 @app.route('/section/<int:id>/')
 @admin_required
 def show_section(id):
-    return "show section"
+    section = Section.query.get(id)
+    if not section:
+        flash('Section does not exist')
+        return redirect(url_for('admin'))
+    return render_template('section/show.html', section=section)
 
 @app.route('/section/<int:id>/edit')
 @admin_required
@@ -240,3 +244,53 @@ def delete_section_post(id):
 
     flash('Section deleted successfully')
     return redirect(url_for('admin'))
+
+@app.route('/book/add/<int:section_id>')
+@admin_required
+def add_book(section_id):
+    sections = Section.query.all()
+    section = Section.query.get(section_id)
+    if not section:
+        flash('Section does not exist')
+        return redirect(url_for('admin'))
+    return render_template('book/add.html', section=section, sections=sections)
+
+@app.route('/book/add/', methods=['POST'])
+@admin_required
+def add_book_post():
+    name = request.form.get('name')
+    author = request.form.get('author')
+    section_id = request.form.get('section_id')
+    #quantity = request.form.get('quantity')
+    #man_date = request.form.get('man_date')
+
+    section = Section.query.get(section_id)
+    if not section:
+        flash('Section does not exist')
+        return redirect(url_for('admin'))
+
+    if not name or not author:
+        flash('Please fill out all fields')
+        return redirect(url_for('add_book', section_id=section_id))
+    '''try:
+        quantity = int(quantity)
+        price = float(price)
+        man_date = datetime.strptime(man_date, '%Y-%m-%d')
+    except ValueError:
+        flash('Invalid quantity or price')
+        return redirect(url_for('add_product', category_id=category_id))
+
+    if price <= 0 or quantity <= 0:
+        flash('Invalid quantity or price')
+        return redirect(url_for('add_product', category_id=category_id))
+
+    if man_date > datetime.now():
+        flash('Invalid manufacturing date')
+        return redirect(url_for('add_product', category_id=category_id))'''
+
+    book = Book(name=name, section=section, author=author)
+    db.session.add(book)
+    db.session.commit()
+
+    flash('Book added successfully')
+    return redirect(url_for('show_section', id=section_id))

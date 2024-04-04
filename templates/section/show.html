@@ -1,35 +1,36 @@
 {% extends 'layout.html' %}
 
 {% block title %}
-    Librarian Dashboard
+    Books of Section {{section.name}}
 {% endblock %}
 
 {% block content %}
 
-<h1 class="display-2">Librarian Dashboard</h1>
-
-<h2 class="display-5">Sections:</h2>
+<h2 class="display-3">
+    Books of Section: {{section.name}}
+</h2>
+<a href="{{url_for('add_book', section_id=section.id)}}" class="btn btn-success">
+    <i class="fas fa-plus    "></i>
+    Add
+</a>
 
 <table class="table">
     <thead>
         <tr>
-            <th>Section ID</th>
-            <th>Section Name</th>
-            <th># of Books</th>
-            <th>Date Created</th>
-            <th>Description</th>
+            <th>Book ID</th>
+            <th>Book Name</th>
+            <th>Author</th>
+            <th>User Issued</th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
-        {% for section in sections %}
+        {% for book in section.books %}
         <tr>
-            <td>{{section.id}}</td>
-            <td>{{section.name}}</td>
-            <td>{{section.books|length}}</td>
-            <td>{{section.date_created}}</td>
-            <td>{{section.description}}</td>
-
+            <td>{{book.id}}</td>
+            <td>{{book.name}}</td>
+            <td>{{book.author}}</td>
+            <td>{{bookrequest.user_id}}</td>
             <td>
                 <a href="{{url_for('show_section', id=section.id)}}" class="btn btn-primary">
                     <i class="fas fa-search    "></i>
@@ -48,10 +49,5 @@
         {% endfor %}
     </tbody>
 </table>
-
-<a href="{{url_for('add_section')}}" class="btn btn-success">
-    <i class="fas fa-plus    "></i>
-    Add
-</a>
 
 {% endblock %}

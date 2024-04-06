@@ -272,21 +272,6 @@ def add_book_post():
     if not name or not author:
         flash('Please fill out all fields')
         return redirect(url_for('add_book', section_id=section_id))
-    '''try:
-        quantity = int(quantity)
-        price = float(price)
-        man_date = datetime.strptime(man_date, '%Y-%m-%d')
-    except ValueError:
-        flash('Invalid quantity or price')
-        return redirect(url_for('add_product', category_id=category_id))
-
-    if price <= 0 or quantity <= 0:
-        flash('Invalid quantity or price')
-        return redirect(url_for('add_product', category_id=category_id))
-
-    if man_date > datetime.now():
-        flash('Invalid manufacturing date')
-        return redirect(url_for('add_product', category_id=category_id))'''
 
     book = Book(name=name, section=section, author=author)
     db.session.add(book)

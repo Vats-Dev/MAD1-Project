@@ -9,10 +9,15 @@
 <h2 class="display-3">
     Books of Section: {{section.name}}
 </h2>
-<a href="{{url_for('add_book', section_id=section.id)}}" class="btn btn-success">
-    <i class="fas fa-plus    "></i>
-    Add
-</a>
+<div class="heading">
+    <h2 class="text-muted">
+        Books
+    </h2>
+    <a href="{{url_for('add_book', section_id=section.id)}}" class="btn btn-success">
+        <i class="fas fa-plus    "></i>
+        Add
+    </a>
+</div>
 
 <table class="table">
     <thead>
@@ -50,4 +55,16 @@
     </tbody>
 </table>
 
+{% endblock %}
+
+{% block style %}
+    <style>
+        .heading{
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+    
 {% endblock %}

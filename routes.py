@@ -261,8 +261,6 @@ def add_book_post():
     name = request.form.get('name')
     author = request.form.get('author')
     section_id = request.form.get('section_id')
-    #quantity = request.form.get('quantity')
-    #man_date = request.form.get('man_date')
 
     section = Section.query.get(section_id)
     if not section:
@@ -278,4 +276,61 @@ def add_book_post():
     db.session.commit()
 
     flash('Book added successfully')
+    return redirect(url_for('show_section', id=section_id))
+
+@app.route('/book/<int:id>/edit')
+@admin_required
+def edit_book(id):
+    sections = Section.query.all()
+    book = Book.query.get(id)
+    return render_template('book/edit.html', sections=sections, book=book)
+
+@app.route('/book/<int:id>/edit/', methods=['POST'])
+@admin_required
+def edit_book_post(id):
+    name = request.form.get('name')
+    author = request.form.get('author')
+    section_id = request.form.get('section_id')
+
+    section = Section.query.get(section_id)
+    if not section:
+        flash('Section does not exist')
+        return redirect(url_for('admin'))
+
+    if not name or not author:
+        flash('Please fill out all fields')
+        return redirect(url_for('add_book', section_id=section_id))
+
+
+    book = Book.query.get(id)
+    book.name = name
+    book.author = author
+    book.section_id=section_id
+    
+    db.session.commit()
+
+    flash('Book edited successfully')
+    return redirect(url_for('show_section', id=section_id))
+
+@app.route('/book/<int:id>/delete')
+@admin_required
+def delete_book(id):
+    book = Book.query.get(id)
+    if not book:
+        flash('Book does not exist')
+        return redirect(url_for('admin'))
+    return render_template('book/delete.html', book=book)
+
+@app.route('/book/<int:id>/delete', methods=['POST'])
+@admin_required
+def delete_book_post(id):
+    book = Book.query.get(id)
+    if not book:
+        flash('Book does not exist')
+        return redirect(url_for('admin'))
+    section_id = book.section.id
+    db.session.delete(book)
+    db.session.commit()
+
+    flash('Book deleted successfully')
     return redirect(url_for('show_section', id=section_id))

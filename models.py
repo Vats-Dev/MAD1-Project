@@ -23,7 +23,7 @@ class Section(db.Model):
 class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    content = db.Column(db.Text, nullable=False)
+    content = db.Column(db.Text) #!!!!!!!!!!!!!!CHANGE THIS!!!!!!!!!!!!!!!!!!!
     author = db.Column(db.String(100), nullable=False)
     pages = db.Column(db.Integer)  
     section_id = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=False)

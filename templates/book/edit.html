@@ -1,16 +1,16 @@
 {% extends 'layout.html' %}
 
 {% block title %}
-    Add Book
+    Edit Book
 {% endblock %}
 
 {% block content %}
 
 <h1 class="display-2">
-    Add Book
+    Edit Book
 </h1>
 
-<form action="{{url_for('add_book_post')}}" method="post" class="form">
+<form action="{{url_for('edit_book_post', id=book.id)}}" method="post" class="form">
     <div class="form-group">
         <label for="name" class="form-label">Book Name:</label>
         <input type="text" 
@@ -31,7 +31,7 @@
         <label for="section_id" class="form-label">Section:</label>
         <select name="section_id" id="section_id" class="form-control" required>
             {% for sec in sections %}
-            {% if sec.id == section.id %}
+            {% if sec.id == book.section.id %}
                 <option selected value="{{sec.id}}">{{sec.name}}</option>
             {% else %}
                 <option value="{{sec.id}}">{{sec.name}}</option>
@@ -44,7 +44,7 @@
 
     <button type="submit" class="btn btn-success">
         <i class="fas fa-plus"></i>
-        Add
+        Edit
     </button>
 </form>
 

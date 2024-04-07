@@ -94,7 +94,27 @@ def index():
     user = User.query.get(session['user_id'])
     if user.is_librarian:
         return redirect(url_for('admin'))
-    return render_template('index.html')
+    sections = Section.query.all()
+    #return render_template('index.html', sections=sections)
+
+    parameter = request.args.get('parameter')
+    query = request.args.get('query')
+    parameters = {
+        'sname': 'Section Name',
+        'bname': 'Book Name',
+        'aname': 'Author Name'
+    }
+
+    if parameter == 'sname':
+        sections = Section.query.filter(Section.name.ilike(f'%{query}%')).all()
+        return render_template('index.html', sections=sections, parameters=parameters, query=query)
+    elif parameter == 'bname':
+        return render_template('index.html', sections=sections, param=parameter, bname=query, parameters=parameters, query=query)
+    elif parameter == 'price':
+        return render_template('index.html', sections=sections, param=parameter, aname=query, parameters=parameters, query=query)
+
+
+    return render_template('index.html', sections=sections, parameters=parameters)
 
 @app.route('/profile')
 @auth_required
@@ -334,3 +354,26 @@ def delete_book_post(id):
 
     flash('Book deleted successfully')
     return redirect(url_for('show_section', id=section_id))
+
+@app.route('/book_request/<int:book_id>', methods=['POST'])
+@auth_required
+def book_request(book_id):
+    book = Book.query.get(book_id)
+    if not book:
+        flash('Book does not exist')
+        return redirect(url_for('index'))
+    
+    user = session['user_id']
+
+    book_request = BookRequest(
+        user_id=user,
+        book_id=book.id,
+        request_date=datetime.now(),
+        is_active=True  # By default, the request is active until approved or denied
+    )
+
+    db.session.add(book_request)
+    db.session.commit()
+
+    flash('Book request submitted successfully. Please wait for librarian approval.')
+    return redirect(url_for('index'))

@@ -97,24 +97,20 @@ def index():
     sections = Section.query.all()
     #return render_template('index.html', sections=sections)
 
-    parameter = request.args.get('parameter')
-    query = request.args.get('query')
-    parameters = {
-        'sname': 'Section Name',
-        'bname': 'Book Name',
-        'aname': 'Author Name'
-    }
+    sname = request.args.get('sname') or ''
+    bname = request.args.get('bname') or ''
+    aname = request.args.get('aname') or ''
+    #FIX THIS
+    books=Book.query
+    if sname:
+        sections = Section.query.filter(Section.name.ilike(f'%{sname}%')).all()
+    if bname:
+        books = books.filter(Book.name.ilike(f'%{bname}%'))
+    if aname:
+        books = books.filter(Book.author.ilike(f'%{aname}%'))
+    books = books.all()
 
-    if parameter == 'sname':
-        sections = Section.query.filter(Section.name.ilike(f'%{query}%')).all()
-        return render_template('index.html', sections=sections, parameters=parameters, query=query)
-    elif parameter == 'bname':
-        return render_template('index.html', sections=sections, param=parameter, bname=query, parameters=parameters, query=query)
-    elif parameter == 'price':
-        return render_template('index.html', sections=sections, param=parameter, aname=query, parameters=parameters, query=query)
-
-
-    return render_template('index.html', sections=sections, parameters=parameters)
+    return render_template('index.html', sections=sections, sname=sname, bname=bname, aname=aname, books=books)
 
 @app.route('/profile')
 @auth_required

@@ -3,21 +3,32 @@
         <div class="col-md-12">
             <form action="" method="GET">
                 <div class="input-group">
-                    <select name="parameter" id="parameter" class="parameter form-select">
-                        {% for parameter in parameters %}
-                            {% if param and parameter == param %}
-                                <option value="{{parameter}}" selected>{{parameters[parameter]}}</option>
-                            {% else %}
-                                <option value="{{parameter}}">{{parameters[parameter]}}</option>
-                            {% endif %}
-                        {% endfor %}
-                    </select>
+                    
                     <input type="text"
-                    value="{{query}}" 
-                    name="query" class="form-control w-50" placeholder="Search for...">
-                    <span class="input-group-btn">
-                        <button class="btn btn-outline-primary" type="submit">Search</button>
-                    </span>
+                    name="sname" 
+                    id="sname" 
+                    value="{{sname}}"
+                    class="form-control" 
+                    placeholder="Section">
+                    <input type="text" 
+                    name="bname" 
+                    id="bname" 
+                    value="{{bname}}"
+                    class="form-control" 
+                    placeholder="Book">
+                    <input type="text" 
+                    name="aname" 
+                    id="aname" 
+                    value="{{aname}}"
+                    class="form-control" 
+                    placeholder="Author">
+                    <a href="{{url_for('index')}}" class="btn btn-outline-danger">
+                        <i class="fas fa-backspace    "></i>
+                        Clear
+                    </a>
+                    <button class="btn btn-outline-primary" type="submit">
+                        <i class="fa fa-search"></i>
+                        Search
                 </div>
             </form>
         </div>

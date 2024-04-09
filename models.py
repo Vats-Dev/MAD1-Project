@@ -5,12 +5,17 @@ from datetime import datetime
 
 db=SQLAlchemy(app)
 
+user_book_association = db.Table('user_book_association',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('book_id', db.Integer, db.ForeignKey('book.id'))
+)
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     username = db.Column(db.String(50), unique=True, nullable=False)
     passhash = db.Column(db.String(100), nullable=False)
     is_librarian = db.Column(db.Boolean, default=False)
+    books_issued = db.relationship('Book', secondary=user_book_association, backref=db.backref('issued_to', lazy='dynamic'))
 
 
 class Section(db.Model):
@@ -37,7 +42,12 @@ class BookRequest(db.Model):
     book_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
     request_date = db.Column(db.DateTime, nullable=False)
     return_date = db.Column(db.DateTime)
-    is_active = db.Column(db.Boolean, default=True)  
+    is_active = db.Column(db.Boolean, default=True)
+    is_approved = db.Column(db.Boolean, default=False)
+
+    user = db.relationship('User', backref=db.backref('book_requests', lazy=True))
+    book = db.relationship('Book', backref=db.backref('book_requests', lazy=True))
+
 
 with app.app_context():
     db.create_all()

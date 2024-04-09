@@ -203,22 +203,6 @@ def edit_section(id):
         return redirect(url_for('admin'))
     return render_template('section/edit.html', section=section)
 
-'''@app.route('/section/<int:id>/edit', methods=['POST'])
-@admin_required
-def edit_section_post(id):
-    section = Section.query.get(id)
-    if not section:
-        flash('Section does not exist')
-        return redirect(url_for('admin'))
-    name = request.form.get('name')
-    if not name:
-        flash('Please fill out all fields')
-        return redirect(url_for('edit_section', id=id))
-    section.name = name
-    db.session.commit()
-    flash('Section updated successfully')
-    return redirect(url_for('admin'))'''
-
 @app.route('/section/<int:id>/edit', methods=['POST'])
 @admin_required
 def edit_section_post(id):
@@ -237,7 +221,6 @@ def edit_section_post(id):
     db.session.commit()
     flash('Section updated successfully')
     return redirect(url_for('admin'))
-
 
 @app.route('/section/<int:id>/delete')
 @admin_required
@@ -351,6 +334,7 @@ def delete_book_post(id):
     flash('Book deleted successfully')
     return redirect(url_for('show_section', id=section_id))
 
+'''
 @app.route('/book_request/<int:book_id>', methods=['POST'])
 @auth_required
 def book_request(book_id):
@@ -373,3 +357,71 @@ def book_request(book_id):
 
     flash('Book request submitted successfully. Please wait for librarian approval.')
     return redirect(url_for('index'))
+'''
+
+@app.route('/request_book/<int:book_id>', methods=['POST'])
+@auth_required
+def request_book(book_id):
+    book = Book.query.get(book_id)
+
+    if book:
+        user_id = session.get('user_id')
+        user = User.query.get(user_id)
+
+        if not user:
+            flash('User not found')
+            return redirect(url_for('index'))
+
+        if book in user.books_issued:
+            flash('You have already requested this book')
+        else:
+            user.books_issued.append(book)
+            db.session.commit()
+
+            book_request = BookRequest(
+                user_id=user.id,
+                book_id=book.id,
+                request_date=datetime.now(),
+                is_active=True
+            )
+            db.session.add(book_request)
+            db.session.commit()
+            
+            flash('Book request submitted successfully')
+    else:
+        flash('Book not found')
+    return redirect(url_for('index'))
+
+@app.route('/approve_request/<int:request_id>', methods=['POST'])
+@admin_required
+def approve_request(request_id):
+    request = BookRequest.query.get(request_id)
+    if request:
+        # Perform approval actions
+        db.session.delete(request)
+        db.session.commit()
+        flash('Request approved')
+    else:
+        flash('Request not found')
+    return redirect(url_for('requests'))
+
+@app.route('/deny_request/<int:request_id>', methods=['POST'])
+@admin_required
+def deny_request(request_id):
+    request = BookRequest.query.get(request_id)
+    if request:
+        # Perform denial actions
+        db.session.delete(request)
+        db.session.commit()
+        flash('Request denied')
+    else:
+        flash('Request not found')
+    return redirect(url_for('requests'))
+
+@app.route('/pending_requests')
+@admin_required
+def pending_requests():
+    # Query pending book requests
+    pending_requests = BookRequest.query.filter_by(is_active=True).all()
+    
+    return render_template('pending_requests.html', pending_requests=pending_requests)

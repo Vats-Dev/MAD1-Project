@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<h1>Pending Book Requests</h1>
+{% if pending_requests %}
+    <ul>
+    {% for request in pending_requests %}
+        <li>
+            <strong>User:</strong> {{ request.user.name }} <br>
+            <strong>Book:</strong> {{ request.book.name }} <br>
+            <strong>Request Date:</strong> {{ request.request_date }} <br>
+            <form action="{{ url_for('process_request', request_id=request.id) }}" method="POST">
+                <button type="submit" name="action" value="approve">Approve</button>
+                <button type="submit" name="action" value="deny">Deny</button>
+            </form>
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No pending requests</p>
+{% endif %}
+{% endblock %}

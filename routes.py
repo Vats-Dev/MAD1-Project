@@ -418,10 +418,21 @@ def deny_request(request_id):
         flash('Request not found')
     return redirect(url_for('requests'))
 
+@app.route('/my_requests')
+@auth_required
+def my_requests():
+    user_requests = BookRequest.query.filter_by(user_id=session['user_id']).all()
+    return render_template('my_requests.html', user_requests=user_requests)
+
 @app.route('/pending_requests')
 @admin_required
 def pending_requests():
-    # Query pending book requests
     pending_requests = BookRequest.query.filter_by(is_active=True).all()
-    
     return render_template('pending_requests.html', pending_requests=pending_requests)
+
+@app.context_processor
+def inject_user():
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        return dict(current_user=user)
+    return dict(current_user=None)

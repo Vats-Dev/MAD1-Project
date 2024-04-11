@@ -1,0 +1,32 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-5 mb-4">My Pending Requests</h1>
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            {% if user_requests %}
+                <ul class="list-group">
+                    {% for request in user_requests %}
+                        <li class="list-group-item mb-3">
+                            <div>
+                                <strong>Book:</strong> {{ request.book.name }} <br>
+                                <strong>Author:</strong> {{ request.book.author }} <br>
+                                <strong>Section:</strong> {{ request.book.section.name }} <br>
+                                <strong>Request Date:</strong> {{ request.request_date }} <br>
+                                {% if request.is_approved %}
+                                    <span class="badge badge-success">Approved</span>
+                                {% else %}
+                                    <span class="badge badge-warning">Pending</span>
+                                {% endif %}
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-center">You have no pending requests</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

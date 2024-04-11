@@ -1,22 +1,36 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-<h1>Pending Book Requests</h1>
-{% if pending_requests %}
-    <ul>
-    {% for request in pending_requests %}
-        <li>
-            <strong>User:</strong> {{ request.user.name }} <br>
-            <strong>Book:</strong> {{ request.book.name }} <br>
-            <strong>Request Date:</strong> {{ request.request_date }} <br>
-            <form action="{{ url_for('process_request', request_id=request.id) }}" method="POST">
-                <button type="submit" name="action" value="approve">Approve</button>
-                <button type="submit" name="action" value="deny">Deny</button>
-            </form>
-        </li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No pending requests</p>
-{% endif %}
+<div class="container">
+    <h1 class="mt-5 mb-4">Pending Book Requests</h1>
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            {% if pending_requests %}
+                <ul class="list-group">
+                    {% for request in pending_requests %}
+                        <li class="list-group-item mb-3">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>User:</strong> {{ request.user.name }} <br>
+                                    <strong>Book:</strong> {{ request.book.name }} <br>
+                                    <strong>Request Date:</strong> {{ request.request_date }} <br>
+                                </div>
+                                <div>
+                                    <form action="{{ url_for('approve_request', request_id=request.id) }}" method="POST" class="d-inline">
+                                        <button type="submit" class="btn btn-success">Approve</button>
+                                    </form>
+                                    <form action="{{ url_for('deny_request', request_id=request.id) }}" method="POST" class="d-inline ml-2">
+                                        <button type="submit" class="btn btn-danger">Deny</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-center">No pending requests</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}

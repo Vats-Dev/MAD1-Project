@@ -16,7 +16,7 @@ class User(db.Model):
     passhash = db.Column(db.String(100), nullable=False)
     is_librarian = db.Column(db.Boolean, default=False)
     books_issued = db.relationship('Book', secondary=user_book_association, backref=db.backref('issued_to', lazy='dynamic'))
-
+    active_requests = db.relationship('BookRequest', primaryjoin='and_(User.id==BookRequest.user_id, ''BookRequest.is_active==True)', backref='requester', lazy='dynamic')
 
 class Section(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -32,6 +32,7 @@ class Book(db.Model):
     author = db.Column(db.String(100), nullable=False)
     pages = db.Column(db.Integer)  
     section_id = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=False)
+    pdf_path = db.Column(db.String(255))
     
     section = db.relationship('Section', backref=db.backref('books', lazy=True))
 

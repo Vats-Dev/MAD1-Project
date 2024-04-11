@@ -4,6 +4,9 @@ from models import db, User, Section, Book, BookRequest
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from datetime import datetime
+from werkzeug.utils import secure_filename
+import os
+
 
 @app.route('/login')
 def login():
@@ -254,6 +257,7 @@ def add_book(section_id):
         return redirect(url_for('admin'))
     return render_template('book/add.html', section=section, sections=sections)
 
+'''
 @app.route('/book/add/', methods=['POST'])
 @admin_required
 def add_book_post():
@@ -275,7 +279,8 @@ def add_book_post():
     db.session.commit()
 
     flash('Book added successfully')
-    return redirect(url_for('show_section', id=section_id))
+    return redirect(url_for('show_section', id=section_id)) 
+    '''
 
 @app.route('/book/<int:id>/edit')
 @admin_required
@@ -358,12 +363,23 @@ def book_request(book_id):
     flash('Book request submitted successfully. Please wait for librarian approval.')
     return redirect(url_for('index'))
 '''
+@app.context_processor
+def inject_user():
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        return dict(current_user=user)
+    return dict(current_user=None)
 
 @app.route('/request_book/<int:book_id>', methods=['POST'])
 @auth_required
 def request_book(book_id):
     book = Book.query.get(book_id)
 
+    user = User.query.get(session['user_id'])
+    if user.active_requests.count() >= 5:
+        flash('You have reached the maximum number of active requests.')
+        return redirect(url_for('index'))
+    
     if book:
         user_id = session.get('user_id')
         user = User.query.get(user_id)
@@ -430,9 +446,51 @@ def pending_requests():
     pending_requests = BookRequest.query.filter_by(is_active=True).all()
     return render_template('pending_requests.html', pending_requests=pending_requests)
 
-@app.context_processor
-def inject_user():
-    if 'user_id' in session:
-        user = User.query.get(session['user_id'])
-        return dict(current_user=user)
-    return dict(current_user=None)
+
+
+ALLOWED_EXTENSIONS = {'pdf'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/book/add/', methods=['POST'])
+@admin_required
+def add_book_post():
+    name = request.form.get('name')
+    author = request.form.get('author')
+    section_id = request.form.get('section_id')
+
+    section = Section.query.get(section_id)
+    if not section:
+        flash('Section does not exist')
+        return redirect(url_for('admin'))
+
+    if not name or not author:
+        flash('Please fill out all fields')
+        return redirect(url_for('add_book', section_id=section_id))
+
+    if 'pdf_file' not in request.files:
+        flash('No file part')
+        return redirect(request.url)
+
+    file = request.files['pdf_file']
+
+    if file.filename == '':
+        flash('No selected file')
+        return redirect(request.url)
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        flash('File uploaded successfully')
+
+        book = Book(name=name, author=author, section_id=section_id, pdf_path=filename)
+        db.session.add(book)
+        db.session.commit()
+        flash('Book added successfully')
+
+        return redirect(url_for('show_section', id=section_id))
+
+    else:
+        flash('Invalid file format')
+        return redirect(request.url)

@@ -1,0 +1,14 @@
+<!-- mybooks.html -->
+{% extends 'layout.html' %}
+
+{% block content %}
+  <h1>My Approved Books</h1>
+  <ul>
+    {% for book in books %}
+      <li>
+        <strong>{{ book.name }}</strong> by {{ book.author }}
+        <a href="{{ url_for('view_pdf', book_id=book.id) }}">View PDF</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

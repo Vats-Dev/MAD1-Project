@@ -3,9 +3,10 @@ from app import app
 from models import db, User, Section, Book, BookRequest
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-from datetime import datetime
+from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
 import os
+from flask_sqlalchemy import SQLAlchemy
 
 
 @app.route('/login')
@@ -414,12 +415,16 @@ def approve_request(request_id):
     request = BookRequest.query.get(request_id)
     if request:
         # Perform approval actions
-        db.session.delete(request)
+        request.is_approved = True
+        request.is_active = True
+        current_date = datetime.utcnow()
+        return_date = current_date + timedelta(days=7)
+        request.return_date = return_date
         db.session.commit()
         flash('Request approved')
     else:
         flash('Request not found')
-    return redirect(url_for('requests'))
+    return redirect(url_for('pending_requests'))
 
 @app.route('/deny_request/<int:request_id>', methods=['POST'])
 @admin_required
@@ -427,12 +432,28 @@ def deny_request(request_id):
     request = BookRequest.query.get(request_id)
     if request:
         # Perform denial actions
-        db.session.delete(request)
+        request.is_approved = False
+        request.is_active = False
         db.session.commit()
         flash('Request denied')
     else:
         flash('Request not found')
-    return redirect(url_for('requests'))
+    return redirect(url_for('pending_requests'))
+
+@app.route('/revoke_request/<int:request_id>', methods=['POST'])
+@admin_required
+def revoke_request(request_id):
+    request = BookRequest.query.get(request_id)
+    if request:
+        # Set is_active to False to revoke the request
+        request.is_active = False
+        request.is_approved = False
+        db.session.commit()
+        flash('Request revoked')
+    else:
+        flash('Request not found')
+    return redirect(url_for('pending_requests'))
+
 
 @app.route('/my_requests')
 @auth_required
@@ -443,8 +464,14 @@ def my_requests():
 @app.route('/pending_requests')
 @admin_required
 def pending_requests():
-    pending_requests = BookRequest.query.filter_by(is_active=True).all()
-    return render_template('pending_requests.html', pending_requests=pending_requests)
+    # Query pending book requests
+    pending_requests = BookRequest.query.filter_by(is_active=True, is_approved=False).all()
+    approved_requests = BookRequest.query.filter_by(is_active=True, is_approved=True).all()
+    denied_requests = BookRequest.query.filter_by(is_active=True, is_approved=False).all()
+    
+    return render_template('pending_requests.html', pending_requests=pending_requests, 
+                           approved_requests=approved_requests, denied_requests=denied_requests)
+
 
 
 
@@ -494,3 +521,32 @@ def add_book_post():
     else:
         flash('Invalid file format')
         return redirect(request.url)
+    
+@app.route('/mybooks')
+@auth_required
+def my_books():
+    # Query the current user's approved book requests
+    user = User.query.get(session['user_id'])
+    approved_requests = user.active_requests.filter_by(is_approved=True).all()
+
+    # Extract the associated books from the approved requests
+    approved_books = [request.book for request in approved_requests]
+
+    return render_template('mybooks.html', books=approved_books)
+
+@app.route('/view_pdf/<int:book_id>')
+@auth_required
+def view_pdf(book_id):
+    book = Book.query.get(book_id)
+    current_user = User.query.get(session['user_id'])
+    if book:
+        # Check if the user has access to the book
+        if book in current_user.books_issued:
+            # Retrieve the PDF path and render it in the template
+            return render_template('view_pdf.html', pdf_path=book.pdf_path)
+        else:
+            flash("You don't have access to view this book.")
+            return redirect(url_for('mybooks'))
+    else:
+        flash('Book not found')
+        return redirect(url_for('mybooks'))

@@ -1,0 +1,20 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    View PDF
+{% endblock %}
+
+{% block style %}
+    <!-- Additional CSS styles can be added here if needed -->
+{% endblock %}
+
+{% block content %}
+    <h1 class="mt-3">View PDF</h1>
+    <div class="embed-responsive embed-responsive-16by9 mt-3">
+        <embed class="embed-responsive-item" src="{{ pdf_path }}" type="application/pdf">
+    </div>
+{% endblock %}
+
+{% block script %}
+    <!-- Additional scripts can be added here if needed -->
+{% endblock %}

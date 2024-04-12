@@ -6,6 +6,7 @@
     <div class="row">
         <div class="col-md-8 mx-auto">
             {% if pending_requests %}
+                <h2>Pending Requests</h2>
                 <ul class="list-group">
                     {% for request in pending_requests %}
                         <li class="list-group-item mb-3">
@@ -32,5 +33,53 @@
             {% endif %}
         </div>
     </div>
+    
+    {% if approved_requests %}
+        <div class="row mt-5">
+            <div class="col-md-8 mx-auto">
+                <h2>Approved Requests</h2>
+                <ul class="list-group">
+                    {% for request in approved_requests %}
+                        <li class="list-group-item mb-3">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>User:</strong> {{ request.user.name }} <br>
+                                    <strong>Book:</strong> {{ request.book.name }} <br>
+                                    <strong>Request Date:</strong> {{ request.request_date }} <br>
+                                    <strong>Return Date:</strong> {{request.return_date}} <br>
+                                </div>
+                                <div>
+                                    <form action="{{ url_for('revoke_request', request_id=request.id) }}" method="POST" class="d-inline">
+                                        <button type="submit" class="btn btn-warning">Revoke</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+    
+<!--
+    {% if denied_requests %}
+        <div class="row mt-5">
+            <div class="col-md-8 mx-auto">
+                <h2>Denied Requests</h2>
+                <ul class="list-group">
+                    {% for request in denied_requests %}
+                        {% if request.is_active %}
+                            <li class="list-group-item mb-3">
+                                <strong>User:</strong> {{ request.user.name }} <br>
+                                <strong>Book:</strong> {{ request.book.name }} <br>
+                                <strong>Request Date:</strong> {{ request.request_date }} <br>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
+-->

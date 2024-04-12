@@ -1,14 +1,38 @@
-<!-- mybooks.html -->
 {% extends 'layout.html' %}
 
 {% block content %}
-  <h1>My Approved Books</h1>
-  <ul>
-    {% for book in books %}
-      <li>
-        <strong>{{ book.name }}</strong> by {{ book.author }}
-        <a href="{{ url_for('view_pdf', book_id=book.id) }}">View PDF</a>
-      </li>
-    {% endfor %}
-  </ul>
+<div class="container">
+    <h1 class="mt-5 mb-4">My Approved Books</h1>
+    <div class="books-list">
+        <ul class="list-group">
+            {% for book, return_date in books_with_return_dates %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div class="book-info">
+                    <strong>{{ book.name }}</strong> by {{ book.author }} <br>
+                    <strong>Return Date:</strong> {{ return_date }} <br>
+                </div>
+                <div class="action">
+                    <a href="{{ url_for('view_pdf', book_id=book.id) }}" class="btn btn-primary">View PDF</a>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
 {% endblock %}
+
+{% block style %}
+<style>
+.books-list {
+    width: 60%;
+    margin: auto;
+}
+.book-info {
+    flex: 1;
+}
+.action {
+    margin-left: 10px;
+}
+</style>
+{% endblock %}
+

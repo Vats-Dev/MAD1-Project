@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container">
-    <h1 class="mt-5 mb-4">My Pending Requests</h1>
+    <h1 class="mt-5 mb-4">My Requests</h1>
     <div class="row">
         <div class="col-md-8 mx-auto">
             {% if user_requests %}
@@ -14,11 +14,14 @@
                                 <strong>Author:</strong> {{ request.book.author }} <br>
                                 <strong>Section:</strong> {{ request.book.section.name }} <br>
                                 <strong>Request Date:</strong> {{ request.request_date }} <br>
-                                {% if request.is_approved %}
-                                    <span class="badge badge-success">Approved</span>
+                                <strong>Status:</strong> {{ request.status }} <br> 
+                                <!--{% if request.status == "Approved" %}
+                                    <span class="badge badge-success">{{ request.status }}</span>
+                                {% elif request.status == "Pending" %}
+                                    <span class="badge badge-warning">{{ request.status }}</span>
                                 {% else %}
-                                    <span class="badge badge-warning">Pending</span>
-                                {% endif %}
+                                    <span class="badge badge-danger">{{ request.status }}</span>
+                                {% endif %}-->
                             </div>
                         </li>
                     {% endfor %}

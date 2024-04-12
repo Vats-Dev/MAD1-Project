@@ -458,8 +458,22 @@ def revoke_request(request_id):
 @app.route('/my_requests')
 @auth_required
 def my_requests():
-    user_requests = BookRequest.query.filter_by(user_id=session['user_id']).all()
-    return render_template('my_requests.html', user_requests=user_requests)
+    user_id = session.get('user_id')
+    if user_id:
+        user = User.query.get(user_id)
+        if user:
+            user_requests = BookRequest.query.filter_by(user_id=user_id).all()
+            for request in user_requests:
+                if request.is_approved and request.is_active:
+                    request.status = "Approved"
+                elif not request.is_approved and request.is_active:
+                    request.status = "Pending"
+                else:
+                    request.status = "Denied"
+            return render_template('my_requests.html', user_requests=user_requests)
+    
+    flash('User not found')
+    return redirect(url_for('index'))
 
 @app.route('/pending_requests')
 @admin_required
@@ -526,13 +540,13 @@ def add_book_post():
 @auth_required
 def my_books():
     # Query the current user's approved book requests
-    user = User.query.get(session['user_id'])
-    approved_requests = user.active_requests.filter_by(is_approved=True).all()
+    user_id = session['user_id']
+    user_requests = BookRequest.query.filter_by(user_id=user_id, is_approved=True, is_active=True).all()
 
     # Extract the associated books from the approved requests
-    approved_books = [request.book for request in approved_requests]
+    books_with_return_dates = [(request.book, request.return_date) for request in user_requests]
 
-    return render_template('mybooks.html', books=approved_books)
+    return render_template('mybooks.html', books_with_return_dates=books_with_return_dates)
 
 @app.route('/view_pdf/<int:book_id>')
 @auth_required

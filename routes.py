@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash, session
+from flask import render_template, request, redirect, url_for, flash, session, send_file
 from app import app
 from models import db, User, Section, Book, BookRequest
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -7,6 +7,8 @@ from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
 import os
 from flask_sqlalchemy import SQLAlchemy
+from config import PDF_FILES_DIR
+
 
 
 @app.route('/login')
@@ -487,8 +489,6 @@ def pending_requests():
                            approved_requests=approved_requests, denied_requests=denied_requests)
 
 
-
-
 ALLOWED_EXTENSIONS = {'pdf'}
 
 def allowed_file(filename):
@@ -547,6 +547,11 @@ def my_books():
     books_with_return_dates = [(request.book, request.return_date) for request in user_requests]
 
     return render_template('mybooks.html', books_with_return_dates=books_with_return_dates)
+
+@app.route('/get_pdf/<filename>')
+def get_pdf(filename):
+    full_path = os.path.join(PDF_FILES_DIR, filename)
+    return send_file(full_path, as_attachment=False)
 
 @app.route('/view_pdf/<int:book_id>')
 @auth_required

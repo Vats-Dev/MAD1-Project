@@ -8,6 +8,7 @@ from werkzeug.utils import secure_filename
 import os
 from flask_sqlalchemy import SQLAlchemy
 from config import PDF_FILES_DIR
+from flask import jsonify
 
 
 
@@ -569,3 +570,12 @@ def view_pdf(book_id):
     else:
         flash('Book not found')
         return redirect(url_for('mybooks'))
+    
+@app.route('/analytics')
+def analytics():
+    # Query database to get the number of books issued from each section
+    sections = Section.query.all()
+    section_names = [section.name for section in sections]
+    books_issued_per_section = [len(section.books) for section in sections]
+
+    return jsonify(section_names=section_names, books_issued_per_section=books_issued_per_section)

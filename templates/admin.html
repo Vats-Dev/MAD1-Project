@@ -54,4 +54,48 @@
     Add
 </a>
 
+<div class="mt-5">
+    <canvas id="booksIssuedChart"></canvas>
+</div>
+
 {% endblock %}
+
+{% block script %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Fetch data from the server
+        fetch('/analytics')
+            .then(response => response.json())
+            .then(data => {
+                // Extract section names and books issued per section from the fetched data
+                const sectionNames = data.section_names;
+                const booksIssuedPerSection = data.books_issued_per_section;
+
+                // Create the chart
+                const ctx = document.getElementById('booksIssuedChart').getContext('2d');
+                const booksIssuedChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: sectionNames,
+                        datasets: [{
+                            label: 'Number of Books Issued',
+                            data: booksIssuedPerSection,
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            });
+    });
+</script>
+{% endblock %}
+

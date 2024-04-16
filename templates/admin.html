@@ -8,7 +8,7 @@
 
 <h1 class="display-2">Librarian Dashboard</h1>
 
-<h2 class="display-5">Sections:</h2>
+<br>
 
 <table class="table">
     <thead>
@@ -53,7 +53,8 @@
     <i class="fas fa-plus    "></i>
     Add
 </a>
-
+<br><br><br>
+<h2 class="display-5">Charts</h2>
 <div class="mt-5">
     <canvas id="booksIssuedChart"></canvas>
 </div>
@@ -64,22 +65,19 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Fetch data from the server
         fetch('/analytics')
             .then(response => response.json())
             .then(data => {
-                // Extract section names and books issued per section from the fetched data
                 const sectionNames = data.section_names;
                 const booksIssuedPerSection = data.books_issued_per_section;
 
-                // Create the chart
                 const ctx = document.getElementById('booksIssuedChart').getContext('2d');
                 const booksIssuedChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: sectionNames,
                         datasets: [{
-                            label: 'Number of Books Issued',
+                            label: 'Number of Books',
                             data: booksIssuedPerSection,
                             backgroundColor: 'rgba(54, 162, 235, 0.5)',
                             borderColor: 'rgba(54, 162, 235, 1)',

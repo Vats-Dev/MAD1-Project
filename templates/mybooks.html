@@ -6,7 +6,7 @@
     <div class="books-list">
         <ul class="list-group">
             {% for book, return_date in books_with_return_dates %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
+            <li class="list-group-item d-flex justify-content-between align-items-center mb-3"> <!-- Added mb-3 -->
                 <div class="book-info">
                     <strong>{{ book.name }}</strong> by {{ book.author }} <br>
                     <strong>Return Date:</strong> {{ return_date }} <br>
@@ -38,4 +38,3 @@
 }
 </style>
 {% endblock %}
-

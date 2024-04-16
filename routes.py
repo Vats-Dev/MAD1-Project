@@ -248,11 +248,20 @@ def delete_section_post(id):
     if not section:
         flash('Section does not exist')
         return redirect(url_for('admin'))
+    
+    # Check if any books associated with the section are being used in BookRequest
+    books_with_requests = Book.query.filter_by(section_id=section.id).join(BookRequest).all()
+    if books_with_requests:
+        flash('Cannot delete section. Books in this section are being used by users.')
+        return redirect(url_for('admin'))
+    
+    # No requests, safe to delete the section
     db.session.delete(section)
     db.session.commit()
 
     flash('Section deleted successfully')
     return redirect(url_for('admin'))
+
 
 @app.route('/book/add/<int:section_id>')
 @admin_required
@@ -263,31 +272,6 @@ def add_book(section_id):
         flash('Section does not exist')
         return redirect(url_for('admin'))
     return render_template('book/add.html', section=section, sections=sections)
-
-'''
-@app.route('/book/add/', methods=['POST'])
-@admin_required
-def add_book_post():
-    name = request.form.get('name')
-    author = request.form.get('author')
-    section_id = request.form.get('section_id')
-
-    section = Section.query.get(section_id)
-    if not section:
-        flash('Section does not exist')
-        return redirect(url_for('admin'))
-
-    if not name or not author:
-        flash('Please fill out all fields')
-        return redirect(url_for('add_book', section_id=section_id))
-
-    book = Book(name=name, section=section, author=author)
-    db.session.add(book)
-    db.session.commit()
-
-    flash('Book added successfully')
-    return redirect(url_for('show_section', id=section_id)) 
-    '''
 
 @app.route('/book/<int:id>/edit')
 @admin_required
@@ -311,7 +295,6 @@ def edit_book_post(id):
     if not name or not author:
         flash('Please fill out all fields')
         return redirect(url_for('add_book', section_id=section_id))
-
 
     book = Book.query.get(id)
     book.name = name
@@ -339,38 +322,22 @@ def delete_book_post(id):
     if not book:
         flash('Book does not exist')
         return redirect(url_for('admin'))
-    section_id = book.section.id
+    
+    section_id = None
+    if book.section:
+        section_id = book.section.id
+    
     BookRequest.query.filter_by(book_id=book.id).delete()
     db.session.delete(book)
     db.session.commit()
 
     flash('Book deleted successfully')
-    return redirect(url_for('show_section', id=section_id))
+    if section_id:
+        return redirect(url_for('show_section', id=section_id))
+    else:
+        return redirect(url_for('admin'))
 
-'''
-@app.route('/book_request/<int:book_id>', methods=['POST'])
-@auth_required
-def book_request(book_id):
-    book = Book.query.get(book_id)
-    if not book:
-        flash('Book does not exist')
-        return redirect(url_for('index'))
-    
-    user = session['user_id']
 
-    book_request = BookRequest(
-        user_id=user,
-        book_id=book.id,
-        request_date=datetime.now(),
-        is_active=True  # By default, the request is active until approved or denied
-    )
-
-    db.session.add(book_request)
-    db.session.commit()
-
-    flash('Book request submitted successfully. Please wait for librarian approval.')
-    return redirect(url_for('index'))
-'''
 @app.context_processor
 def inject_user():
     if 'user_id' in session:
@@ -382,7 +349,6 @@ def inject_user():
 @auth_required
 def request_book(book_id):
     book = Book.query.get(book_id)
-
     user = User.query.get(session['user_id'])
     if user.active_requests.count() >= 5:
         flash('You have reached the maximum number of active requests.')
@@ -485,7 +451,6 @@ def my_requests():
 @app.route('/pending_requests')
 @admin_required
 def pending_requests():
-    # Query pending book requests
     pending_requests = BookRequest.query.filter_by(is_active=True, is_approved=False).all()
     approved_requests = BookRequest.query.filter_by(is_active=True, is_approved=True).all()
     denied_requests = BookRequest.query.filter_by(is_active=True, is_approved=False).all()
@@ -504,6 +469,7 @@ def allowed_file(filename):
 def add_book_post():
     name = request.form.get('name')
     author = request.form.get('author')
+    pages = request.form.get('pages')
     section_id = request.form.get('section_id')
 
     section = Section.query.get(section_id)
@@ -511,7 +477,7 @@ def add_book_post():
         flash('Section does not exist')
         return redirect(url_for('admin'))
 
-    if not name or not author:
+    if not name or not author or not pages:
         flash('Please fill out all fields')
         return redirect(url_for('add_book', section_id=section_id))
 
@@ -544,11 +510,9 @@ def add_book_post():
 @app.route('/mybooks')
 @auth_required
 def my_books():
-    # Query the current user's approved book requests
     user_id = session['user_id']
     user_requests = BookRequest.query.filter_by(user_id=user_id, is_approved=True, is_active=True).all()
 
-    # Extract the associated books from the approved requests
     books_with_return_dates = [(request.book, request.return_date) for request in user_requests]
 
     return render_template('mybooks.html', books_with_return_dates=books_with_return_dates)
@@ -564,9 +528,7 @@ def view_pdf(book_id):
     book = Book.query.get(book_id)
     current_user = User.query.get(session['user_id'])
     if book:
-        # Check if the user has access to the book
         if book in current_user.books_issued:
-            # Retrieve the PDF path and render it in the template
             return render_template('view_pdf.html', pdf_path=book.pdf_path)
         else:
             flash("You don't have access to view this book.")
@@ -574,10 +536,10 @@ def view_pdf(book_id):
     else:
         flash('Book not found')
         return redirect(url_for('mybooks'))
-    
+
+
 @app.route('/analytics')
 def analytics():
-    # Query database to get the number of books issued from each section
     sections = Section.query.all()
     section_names = [section.name for section in sections]
     books_issued_per_section = [len(section.books) for section in sections]
@@ -607,4 +569,11 @@ def return_book(book_id):
         flash('Book not found')
     return redirect(url_for('my_books'))
 
-
+@app.route('/admin/view_pdf/<int:book_id>')
+@admin_required
+def admin_view_pdf(book_id):
+    book = Book.query.get(book_id)
+    if not book:
+        flash('Book not found')
+        return redirect(url_for('admin_books'))
+    return render_template('admin_view_pdf.html', pdf_path=book.pdf_path)

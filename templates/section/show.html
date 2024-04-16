@@ -35,6 +35,9 @@
             <td>{{book.id}}</td>
             <td>{{book.name}}</td>
             <td>{{book.author}}</td>
+            <td>{% for user in users_issued_books[book.id] %}
+                {{ user.name }}{% if not loop.last %}, {% endif %}
+            {% endfor %}</td>
 
             <td>
                 <a href="{{url_for('show_section', id=section.id)}}" class="btn btn-primary">

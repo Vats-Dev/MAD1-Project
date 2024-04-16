@@ -199,7 +199,10 @@ def show_section(id):
     if not section:
         flash('Section does not exist')
         return redirect(url_for('admin'))
-    return render_template('section/show.html', section=section)
+    users_issued_books = {}
+    for book in section.books:
+        users_issued_books[book.id] = book.issued_to.all()
+    return render_template('section/show.html', section=section, users_issued_books=users_issued_books)
 
 @app.route('/section/<int:id>/edit')
 @admin_required
@@ -327,7 +330,7 @@ def delete_book(id):
     if not book:
         flash('Book does not exist')
         return redirect(url_for('admin'))
-    return render_template('book/delete.html', book=book)
+    return render_template('book/delete.html', book=book)   
 
 @app.route('/book/<int:id>/delete', methods=['POST'])
 @admin_required
@@ -337,6 +340,7 @@ def delete_book_post(id):
         flash('Book does not exist')
         return redirect(url_for('admin'))
     section_id = book.section.id
+    BookRequest.query.filter_by(book_id=book.id).delete()
     db.session.delete(book)
     db.session.commit()
 

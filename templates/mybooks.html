@@ -13,6 +13,9 @@
                 </div>
                 <div class="action">
                     <a href="{{ url_for('view_pdf', book_id=book.id) }}" class="btn btn-primary">View PDF</a>
+                    <form action="{{ url_for('return_book', book_id=book.id) }}" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-warning">Return</button>
+                    </form>
                 </div>
             </li>
             {% endfor %}

@@ -579,3 +579,28 @@ def analytics():
     books_issued_per_section = [len(section.books) for section in sections]
 
     return jsonify(section_names=section_names, books_issued_per_section=books_issued_per_section)
+
+@app.route('/return_book/<int:book_id>', methods=['POST'])
+@auth_required
+def return_book(book_id):
+    current_user = User.query.get(session['user_id'])
+    book = Book.query.get(book_id)
+    if book:
+        if book in current_user.books_issued:
+            for request in current_user.book_requests:
+                if request.book_id == book_id and request.is_active:
+                    request.is_active = False
+                    request.is_approved = False
+                    db.session.commit()
+                    current_user.books_issued.remove(book)
+                    db.session.commit()
+                    flash('Book returned successfully.')
+                    return redirect(url_for('my_books'))
+            flash("You don't have an active request for this book.")
+        else:
+            flash("You don't have access to return this book.")
+    else:
+        flash('Book not found')
+    return redirect(url_for('my_books'))
+
+

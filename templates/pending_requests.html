@@ -62,25 +62,6 @@
         </div>
     {% endif %}
     
-<!--
-    {% if denied_requests %}
-        <div class="row mt-5">
-            <div class="col-md-8 mx-auto">
-                <h2>Denied Requests</h2>
-                <ul class="list-group">
-                    {% for request in denied_requests %}
-                        {% if request.is_active %}
-                            <li class="list-group-item mb-3">
-                                <strong>User:</strong> {{ request.user.name }} <br>
-                                <strong>Book:</strong> {{ request.book.name }} <br>
-                                <strong>Request Date:</strong> {{ request.request_date }} <br>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-    {% endif %}
+
 </div>
 {% endblock %}
--->

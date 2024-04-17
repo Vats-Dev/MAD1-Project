@@ -45,6 +45,7 @@ class BookRequest(db.Model):
     return_date = db.Column(db.DateTime)
     is_active = db.Column(db.Boolean, default=True)
     is_approved = db.Column(db.Boolean, default=False)
+    review = db.Column(db.Text)
 
     user = db.relationship('User', backref=db.backref('book_requests', lazy=True))
     book = db.relationship('Book', backref=db.backref('book_requests', lazy=True))

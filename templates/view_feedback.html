@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Feedback
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="display-2">Feedback Entries</h1>
+    <div class="feedback-list">
+        <ul class="list-group">
+            {% for entry in feedback_entries %}
+            <li class="list-group-item">
+                <strong>User:</strong> {{ entry.user.username }}<br>
+                <strong>Book:</strong> {{ entry.book.name }} by {{ entry.book.author }}<br>
+                <strong>Book Request ID:</strong> {{ entry.id }}<br>
+                <strong>Feedback:</strong> {{ entry.review }}<br>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

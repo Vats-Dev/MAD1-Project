@@ -577,3 +577,30 @@ def admin_view_pdf(book_id):
         flash('Book not found')
         return redirect(url_for('admin_books'))
     return render_template('admin_view_pdf.html', pdf_path=book.pdf_path)
+
+@app.route('/submit_review/<int:book_request_id>')
+@auth_required
+def submit_review(book_request_id):
+    return render_template('submit_review.html', book_request_id=book_request_id)
+
+@app.route('/submit_review/<int:book_request_id>', methods=['POST'])
+def submit_review_post(book_request_id):
+    review = request.form.get('review')
+
+    book_request = BookRequest.query.get(book_request_id)
+    if not book_request:
+        flash('Book request not found')
+        return redirect(url_for('my_books'))  
+
+    book_request.review = review
+    db.session.commit()
+
+    flash('Review submitted successfully')
+    return redirect(url_for('my_books'))  
+
+@app.route('/admin/view_feedback')
+@admin_required
+def view_feedback():
+    feedback_entries = BookRequest.query.filter(BookRequest.review.isnot(None)).all()
+    return render_template('view_feedback.html', feedback_entries=feedback_entries)
+

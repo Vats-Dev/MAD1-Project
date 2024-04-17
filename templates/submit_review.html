@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Submit Review
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="mt-5 mb-4">Submit Review</h1>
+        <form action="{{ url_for('submit_review_post', book_request_id=book_request_id) }}" method="POST">
+            <div class="mb-3">
+                <label for="review" class="form-label">Your Review:</label>
+                <textarea class="form-control" id="review" name="review" rows="5" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+{% endblock %}

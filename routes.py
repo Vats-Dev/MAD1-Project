@@ -249,13 +249,11 @@ def delete_section_post(id):
         flash('Section does not exist')
         return redirect(url_for('admin'))
     
-    # Check if any books associated with the section are being used in BookRequest
     books_with_requests = Book.query.filter_by(section_id=section.id).join(BookRequest).all()
     if books_with_requests:
         flash('Cannot delete section. Books in this section are being used by users.')
         return redirect(url_for('admin'))
     
-    # No requests, safe to delete the section
     db.session.delete(section)
     db.session.commit()
 
@@ -387,7 +385,6 @@ def request_book(book_id):
 def approve_request(request_id):
     request = BookRequest.query.get(request_id)
     if request:
-        # Perform approval actions
         request.is_approved = True
         request.is_active = True
         current_date = datetime.utcnow()
@@ -404,7 +401,6 @@ def approve_request(request_id):
 def deny_request(request_id):
     request = BookRequest.query.get(request_id)
     if request:
-        # Perform denial actions
         request.is_approved = False
         request.is_active = False
         db.session.commit()
@@ -418,7 +414,6 @@ def deny_request(request_id):
 def revoke_request(request_id):
     request = BookRequest.query.get(request_id)
     if request:
-        # Set is_active to False to revoke the request
         request.is_active = False
         request.is_approved = False
         db.session.commit()

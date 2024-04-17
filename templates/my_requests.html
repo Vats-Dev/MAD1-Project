@@ -15,13 +15,6 @@
                                 <strong>Section:</strong> {{ request.book.section.name }} <br>
                                 <strong>Request Date:</strong> {{ request.request_date }} <br>
                                 <strong>Status:</strong> {{ request.status }} <br> 
-                                <!--{% if request.status == "Approved" %}
-                                    <span class="badge badge-success">{{ request.status }}</span>
-                                {% elif request.status == "Pending" %}
-                                    <span class="badge badge-warning">{{ request.status }}</span>
-                                {% else %}
-                                    <span class="badge badge-danger">{{ request.status }}</span>
-                                {% endif %}-->
                             </div>
                         </li>
                     {% endfor %}
